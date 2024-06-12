@@ -35,17 +35,7 @@ def smooth(depth, loops, maximum):
                     depth[y, x] += 0.5 * diff
     return depth
 
-def update(idt):
-    ax.clear()
-    pc=ax.pcolormesh(wt.x,wt.y,wt.d,shading='auto', cmap=cmocean.cm.deep)
-    ax.set_xlim([x.min(),x.max()])
-    ax.set_ylim([y.min(),y.max()])
-    ax.set_xlabel('[m]')
-    ax.set_ylabel('[m]')
-    for ray_id in range(0, wt.nb_wave_rays, 1):
-        ax.plot(wt.ray_x[ray_id,:idt],wt.ray_y[ray_id,:idt],'-r')
-
-def bar():
+def bar(d_off=5, d_bw=2, T_wave=10):
     nx = 300; ny = 300 # number of grid points in x- and y-direction
     x = np.linspace(0,2000,nx) # size x-domain [m]
     y = np.linspace(0,1000,ny) # size y-domain [m]
@@ -56,9 +46,6 @@ def bar():
     
     nt=100
     rays=60
-    
-    d_off = 5
-    d_bw = 2  # assuming no breaking
     
     d = np.ones((ny, nx)) * d_off
     
@@ -88,7 +75,7 @@ def bar():
                            d=d)
     
     # Set initial conditions
-    wt.set_initial_condition(wave_period=10,
+    wt.set_initial_condition(wave_period=T_wave,
                               theta0=-0.3*np.pi, ipx=np.linspace(-2000, 2000, rays), ipy=np.ones(rays)*1000)
     
     # Solve
@@ -116,8 +103,18 @@ def bar():
     
     # ax.quiver(x, y, U ,V)
     plt.show()
-
-    # ani = animation.FuncAnimation(fig, update, interval=100, repeat=True, repeat_delay=10000, frames=nt)
-    # ani.save("bar.gif")
     
-    # HTML(ani.to_jshtml())
+    def update(idt):
+        ax.clear()
+        pc=ax.pcolormesh(wt.x,wt.y,wt.d,shading='auto', cmap=cmocean.cm.deep)
+        ax.set_xlim([x.min(),x.max()])
+        ax.set_ylim([y.min(),y.max()])
+        ax.set_xlabel('[m]')
+        ax.set_ylabel('[m]')
+        for ray_id in range(0, wt.nb_wave_rays, 1):
+            ax.plot(wt.ray_x[ray_id,:idt],wt.ray_y[ray_id,:idt],'-r')
+            
+    ani = animation.FuncAnimation(fig, update, interval=100, repeat=True, repeat_delay=10000, frames=nt)
+    ani.save("bar.gif")
+
+    return ani
